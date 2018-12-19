@@ -14,9 +14,9 @@ def index():
 
 def gen(path):
     while True:
-        frame = path
+        frame = Image.open(path)
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+               b'Content-Type: image/jpeg\r\n\r\n' + bytes(frame) + b'\r\n\r\n')
 
 @app.route('/video_feed')
 def video_feed():
@@ -26,4 +26,4 @@ def video_feed():
 if __name__ == '__main__':
     print('import success')
     app.run(host='0.0.0.0', debug=False, threaded=True)
-    main()
+    # main()
