@@ -1,29 +1,13 @@
-﻿# ---------------------------------------------------------------------------
-# Copyright 2017-2018  OMRON Corporation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ---------------------------------------------------------------------------
-
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import sys
 import time
-import p2def
-from serial_connector import SerialConnector
-from hvc_p2_api import HVCP2Api
-from hvc_tracking_result import HVCTrackingResult
-from grayscale_image import GrayscaleImage
+import lib.p2def as p2def
+from lib.serial_connector import SerialConnector
+from lib.hvc_p2_api import HVCP2Api
+from lib.hvc_tracking_result import HVCTrackingResult
+from lib.grayscale_image import GrayscaleImage
 
 ###############################################################################
 #  User Config. Please edit here if you need.                                 #
@@ -53,7 +37,8 @@ exec_func = p2def.EX_FACE\
 #exec_func = p2def.EX_NONE  # Please use this to get just the image.
 
 # Output image type
-output_img_type = p2def.OUT_IMG_TYPE_NONE
+output_img_type = p2def.OUT_IMG_TYPE_QVGA
+                      # OUT_IMG_TYPE_NONE
                       # OUT_IMG_TYPE_QQVGA
                       # OUT_IMG_TYPE_QVGA
 
@@ -260,9 +245,13 @@ def main():
             if output_img_type != p2def.OUT_IMG_TYPE_NONE:
                 img.save(img_fname)
 
-            print ("==== Elapsed time:{0}".format(elapsed_time)) + "[msec] ===="
-            print hvc_tracking_result
-            print "Press Ctrl+C Key to end:\n"
+            if len(hvc_tracking_result.faces)>0:
+                print ("==== Elapsed time:{0}".format(elapsed_time)) + "[msec] ===="
+                print ('Face Count = %s\n' % len(hvc_tracking_result.faces))
+                for i, face in enumerate(hvc_tracking_result.faces):
+                    print ('  [%s] ' % i + face.__str__() +'\n')
+                    print ('  [%s] ' % i + face.expression.__str__() +'\n')
+                print "Press Ctrl+C Key to end:\n"
 
     except KeyboardInterrupt:
         time.sleep(1)
