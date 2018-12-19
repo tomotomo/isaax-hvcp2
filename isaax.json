@@ -1,0 +1,7 @@
+{
+    "name": "isaax HVC-P2 demo",
+    "version": "v0.1",
+    "scripts": {
+        "start": "python -u demo.py /dev/ttyACM0 921600 OFF"
+    }
+}
