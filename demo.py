@@ -8,6 +8,8 @@ from lib.serial_connector import SerialConnector
 from lib.hvc_p2_api import HVCP2Api
 from lib.hvc_tracking_result import HVCTrackingResult
 from lib.grayscale_image import GrayscaleImage
+from datetime import datetime
+from ambient_connector import AmbientConnector
 
 ###############################################################################
 #  User Config. Please edit here if you need.                                 #
@@ -28,19 +30,13 @@ exec_func = p2def.EX_FACE\
           | p2def.EX_AGE\
           | p2def.EX_GENDER\
           | p2def.EX_EXPRESSION\
-          | p2def.EX_HAND
+#          | p2def.EX_HAND
 #          | p2def.EX_RECOGNITION\
 #          | p2def.EX_BLINK\
 #          | p2def.EX_GAZE\
 #          | p2def.EX_BODY\
 
 #exec_func = p2def.EX_NONE  # Please use this to get just the image.
-
-# Output image type
-output_img_type = p2def.OUT_IMG_TYPE_QVGA
-                      # OUT_IMG_TYPE_NONE
-                      # OUT_IMG_TYPE_QQVGA
-                      # OUT_IMG_TYPE_QVGA
 
 # HVC camera angle setting
 hvc_camera_angle = p2def.HVC_CAM_ANGLE_0
@@ -106,22 +102,27 @@ fr_min_ratio = 60       # Minimum account ratio in complete frame count.
 
 def _parse_arg(argv):
     argc = len(argv)
-    if argc == 3 or argc == 4:
+    if argc > 3:
         # Gets port infomation
         portinfo = argv[1]
         # Gets baudrate
         baudrate = int(argv[2])
         if baudrate not in p2def.AVAILABLE_BAUD:
             print "Error: Invalid baudrate."
-            sys.exit()
+            sys.exit(1)
         # Gets STB flag
         use_stb = p2def.USE_STB_ON # Default setting is ON
-        if argc == 4 and argv[3] == "OFF":
+        if argc > 3 and argv[3] == "OFF":
             use_stb = p2def.USE_STB_OFF
     else:
         print "Error: Invalid argument."
-        sys.exit()
-    return (portinfo, baudrate, use_stb)
+        sys.exit(1)
+    if argc == 5 and argv[4] == 'QVGA':
+        output_img_type = p2def.OUT_IMG_TYPE_QVGA
+    else:
+        output_img_type = p2def.OUT_IMG_TYPE_NONE
+
+    return (portinfo, baudrate, use_stb, output_img_type)
 
 def _check_connection(hvc_p2_api):
     (res_code, hvc_type, major, minor, release, rev) = hvc_p2_api.get_version()
@@ -210,7 +211,7 @@ def _set_stb_parameters(hvc_p2_api):
 
 def main():
     # Parses arguments
-    (portinfo, baudrate, use_stb) = _parse_arg(sys.argv)
+    (portinfo, baudrate, use_stb, output_img_type) = _parse_arg(sys.argv)
 
     connector = SerialConnector()
     hvc_p2_api = HVCP2Api(connector, exec_func, use_stb)
@@ -224,6 +225,8 @@ def main():
     # The 2nd connection in specified baudrate
     hvc_p2_api.connect(portinfo, baudrate, timeout)
     _check_connection(hvc_p2_api)
+
+    am = AmbientConnector()
 
     print "Start detection.\n"
     print "Press Ctrl+C Key to end:\n"
@@ -253,8 +256,10 @@ def main():
                 print ('Face Count = %s\n' % len(hvc_tracking_result.faces))
                 for i, face in enumerate(hvc_tracking_result.faces):
                     print ('  [%s] ' % i + face.__str__() +'\n')
-                    print ('  [%s] ' % i + face.expression.__str__() +'\n')
                 print "Press Ctrl+C Key to end:\n"
+
+                data = am.buffer(hvc_tracking_result.faces)
+                print(data)
 
     except KeyboardInterrupt:
         time.sleep(1)

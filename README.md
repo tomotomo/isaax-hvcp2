@@ -1,6 +1,6 @@
 ## 公式README
 
-[ReadMe_J.txt](./ReadMe_J.txt)を読むこと。
+[ReadMe_J.txt](./lib/ReadMe_J.txt)を読むこと。
 
     [ご使用にあたって]
     ・本サンプルコードおよびドキュメントの著作権はオムロンに帰属します。
@@ -29,10 +29,6 @@ python execution.py /dev/tty.usbmodem11 921600 OFF
 
 ### デモ作るよ
 
-```bash
-pip2 install flask
-```
-
 インタラクティブにテスト
 
 ```pyton
@@ -58,3 +54,17 @@ hvc_p2_api.connect(portinfo, p2def.DEFAULT_BAUD, 10)
 hvc_p2_api.set_uart_baudrate(baudrate)
 hvc_p2_api.disconnect()
 ```
+
+Ambientにデータを送る
+
+```bash
+pip install git+https://github.com/AmbientDataInc/ambient-python-lib.git
+```
+
+### Mac用デモ
+
+```bash
+AM_CHANNEL_ID=*** AM_WRITE_KEY=***** python2 demo.py /dev/tty.usbmodem11 921600 OFF QVGA
+```
+
+### Raspberry Pi用デモ
